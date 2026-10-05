@@ -29,6 +29,18 @@ const elements = {
   chart: document.querySelector('#chart')
 };
 const chartAxis = document.querySelector('#chart-axis');
+const storageKey = 'leadPredictorCalculatorSettings';
+const preferenceControls = {
+  language: elements.language,
+  currency: elements.currency,
+  start: elements.start,
+  end: elements.end,
+  revenue: elements.revenue,
+  orderValue: elements.orderValue,
+  leadRate: elements.leadRate,
+  prospectRate: elements.prospectRate
+};
+const defaultSettings = Object.fromEntries(Object.entries(preferenceControls).map(([key, control]) => [key, control.value]));
 
 function readPositiveNumber(input) {
   const value = input.value.trim();
@@ -42,6 +54,56 @@ function parseDate(value) {
   if (!match) return null;
   const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
   return date.getFullYear() === Number(match[1]) && date.getMonth() === Number(match[2]) - 1 && date.getDate() === Number(match[3]) ? date : null;
+}
+
+function isValidPreference(key, value) {
+  if (typeof value !== 'string' && typeof value !== 'number') return false;
+  const normalized = String(value);
+  if (key === 'language' || key === 'currency') {
+    return Array.from(preferenceControls[key].options).some(option => option.value === normalized);
+  }
+  if (key === 'start' || key === 'end') return parseDate(normalized) !== null;
+  if (key === 'revenue' || key === 'orderValue') {
+    return normalized.trim() !== '' && Number.isFinite(Number(normalized)) && Number(normalized) > 0;
+  }
+  if (key === 'leadRate' || key === 'prospectRate') {
+    const number = Number(normalized);
+    const control = preferenceControls[key];
+    return Number.isInteger(number) && number >= Number(control.min) && number <= Number(control.max);
+  }
+  return false;
+}
+
+function restoreSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey));
+    if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return;
+
+    Object.entries(preferenceControls).forEach(([key, control]) => {
+      const value = saved[key];
+      control.value = isValidPreference(key, value) ? String(value) : defaultSettings[key];
+    });
+
+    const start = parseDate(elements.start.value);
+    const end = parseDate(elements.end.value);
+    if (start > end) {
+      elements.start.value = defaultSettings.start;
+      elements.end.value = defaultSettings.end;
+    }
+  } catch {
+    Object.entries(preferenceControls).forEach(([key, control]) => {
+      control.value = defaultSettings[key];
+    });
+  }
+}
+
+function saveSettings() {
+  try {
+    const settings = Object.fromEntries(Object.entries(preferenceControls).map(([key, control]) => [key, control.value]));
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+  } catch {
+    // Storage can be unavailable in private or restricted browsing contexts.
+  }
 }
 
 function getCampaignMonths(startValue, endValue) {
@@ -204,8 +266,10 @@ function update() {
   elements.start.setAttribute('aria-invalid', dateError ? 'true' : 'false');
   elements.end.setAttribute('aria-invalid', dateError ? 'true' : 'false');
   renderChart(months, validTotals, locale, copy);
+  saveSettings();
 }
 
+restoreSettings();
 document.querySelector('#settings-form').addEventListener('input', update);
 document.querySelector('#settings-form').addEventListener('change', update);
 elements.leadRate.addEventListener('input', update);
