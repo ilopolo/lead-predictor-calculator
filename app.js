@@ -4,6 +4,7 @@ const translations = {
     totalRevenue: 'Total Revenue', averageOrderValue: 'Avg. Order Value', monthAxis: 'Month',
     prospects: 'Prospects', leads: 'Leads', customers: 'Customers',
     leadResponseRate: 'Lead Response Rate', prospectResponseRate: 'Prospect Response Rate',
+    forecastAnnouncement: (customers, leads, prospects) => `Forecast updated. Customers: ${customers}, Leads: ${leads}, Prospects: ${prospects}.`,
     chartLabel: 'Monthly campaign chart. Hover a month row to see its values.',
     invalidAmount: 'Enter a number greater than zero.', unsupportedCalculation: 'These values produce a result that is too large to calculate.', invalidDate: 'Choose a valid campaign date range.'
   },
@@ -12,6 +13,7 @@ const translations = {
     totalRevenue: 'Общи приходи', averageOrderValue: 'Средна стойност на поръчка', monthAxis: 'Месец',
     prospects: 'Потенциални клиенти', leads: 'Лийдове', customers: 'Клиенти',
     leadResponseRate: 'Процент на отговор от лийдове', prospectResponseRate: 'Процент на отговор от потенциални клиенти',
+    forecastAnnouncement: (customers, leads, prospects) => `Прогнозата е актуализирана. Клиенти: ${customers}, Лийдове: ${leads}, Потенциални клиенти: ${prospects}.`,
     chartLabel: 'Месечна графика на кампанията. Посочете ред, за да видите стойностите.',
     invalidAmount: 'Въведете число, по-голямо от нула.', unsupportedCalculation: 'Тези стойности дават резултат, който е твърде голям за изчисляване.', invalidDate: 'Изберете валиден период на кампанията.'
   }
@@ -26,7 +28,8 @@ const elements = {
   orderValue: document.querySelector('#order-value'),
   leadRate: document.querySelector('#lead-rate'),
   prospectRate: document.querySelector('#prospect-rate'),
-  chart: document.querySelector('#chart')
+  chart: document.querySelector('#chart'),
+  announcer: document.querySelector('#result-announcer')
 };
 const chartAxis = document.querySelector('#chart-axis');
 const storageKey = 'leadPredictorCalculatorSettings';
@@ -251,7 +254,7 @@ function renderChart(months, totals, locale, copy) {
   });
 }
 
-function update() {
+function update(shouldAnnounce = false) {
   const language = elements.language.value;
   const locale = language === 'bg' ? 'bg-BG' : 'en-US';
   const copy = translations[language];
@@ -304,10 +307,21 @@ function update() {
   elements.end.setAttribute('aria-invalid', dateError ? 'true' : 'false');
   renderChart(months, validTotals, locale, copy);
   saveSettings();
+
+  if (shouldAnnounce) {
+    const validationMessages = [];
+    if (revenue === null) validationMessages.push(`${copy.totalRevenue}: ${copy.invalidAmount}`);
+    if (orderValue === null) validationMessages.push(`${copy.averageOrderValue}: ${copy.invalidAmount}`);
+    if (unsupportedCalculation) validationMessages.push(copy.unsupportedCalculation);
+    if (dateError) validationMessages.push(copy.invalidDate);
+    elements.announcer.textContent = validationMessages.length
+      ? validationMessages.join(' ')
+      : copy.forecastAnnouncement(formatNumber(customers, locale), formatNumber(leads, locale), formatNumber(prospects, locale));
+  }
 }
 
 function handleSettingChange() {
-  update();
+  update(true);
   updateUrlSettings();
 }
 
