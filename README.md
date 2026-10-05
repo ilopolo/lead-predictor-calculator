@@ -6,6 +6,10 @@ A static, dependency-free campaign forecast dashboard built with vanilla HTML, C
 
 Open `index.html` directly in a modern browser. No server, package installation, or build step is required.
 
+## Deploy to Netlify
+
+Import this GitHub repository into Netlify. Netlify reads `netlify.toml`, which publishes the repository root with no build command. The deployed app includes live forecast formulas, browser-local preferences, shareable forecast links, English and Bulgarian language options, currency selection, and keyboard and screen-reader accessibility support.
+
 ## Forecast formulas
 
 - Customers = `ceil(total revenue / average order value)`
