@@ -97,12 +97,49 @@ function restoreSettings() {
   }
 }
 
+function restoreUrlSettings() {
+  const params = new URLSearchParams(window.location.search);
+  const previousSettings = Object.fromEntries(Object.entries(preferenceControls).map(([key, control]) => [key, control.value]));
+  const appliedKeys = [];
+
+  Object.entries(preferenceControls).forEach(([key, control]) => {
+    const values = params.getAll(key);
+    if (values.length !== 1 || !isValidPreference(key, values[0])) return;
+    control.value = values[0];
+    appliedKeys.push(key);
+  });
+
+  const start = parseDate(elements.start.value);
+  const end = parseDate(elements.end.value);
+  if (start > end) {
+    ['start', 'end'].forEach(key => {
+      if (appliedKeys.includes(key)) preferenceControls[key].value = previousSettings[key];
+    });
+  }
+}
+
 function saveSettings() {
   try {
     const settings = Object.fromEntries(Object.entries(preferenceControls).map(([key, control]) => [key, control.value]));
     localStorage.setItem(storageKey, JSON.stringify(settings));
   } catch {
     // Storage can be unavailable in private or restricted browsing contexts.
+  }
+}
+
+function updateUrlSettings() {
+  try {
+    const url = new URL(window.location.href);
+    Object.entries(preferenceControls).forEach(([key, control]) => {
+      if (isValidPreference(key, control.value)) {
+        url.searchParams.set(key, control.value);
+      } else {
+        url.searchParams.delete(key);
+      }
+    });
+    window.history.replaceState(null, '', url);
+  } catch {
+    return;
   }
 }
 
@@ -269,9 +306,15 @@ function update() {
   saveSettings();
 }
 
+function handleSettingChange() {
+  update();
+  updateUrlSettings();
+}
+
 restoreSettings();
-document.querySelector('#settings-form').addEventListener('input', update);
-document.querySelector('#settings-form').addEventListener('change', update);
-elements.leadRate.addEventListener('input', update);
-elements.prospectRate.addEventListener('input', update);
+restoreUrlSettings();
+document.querySelector('#settings-form').addEventListener('change', handleSettingChange);
+document.querySelector('#settings-form').addEventListener('input', handleSettingChange);
+elements.leadRate.addEventListener('input', handleSettingChange);
+elements.prospectRate.addEventListener('input', handleSettingChange);
 update();
