@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#151e2c">
+  <title>LeadPredictor Calculator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="dashboard" aria-labelledby="app-title">
+    <aside class="sidebar" aria-label="Campaign settings">
+      <a class="brand" href="#app-title" aria-label="LeadPredictor home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span id="app-title"><strong>Lead</strong>Predictor</span>
+      </a>
+
+      <form class="settings-panel" id="settings-form" novalidate>
+        <label class="field">
+          <span data-i18n="language">Language</span>
+          <select id="language" name="language">
+            <option value="en" selected>🇺🇸 English</option>
+            <option value="bg">🇧🇬 Български</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span data-i18n="currency">Currency</span>
+          <select id="currency" name="currency">
+            <option value="USD" selected>$ US Dollar</option>
+            <option value="EUR">€ Euro</option>
+            <option value="GBP">£ British Pound</option>
+            <option value="BGN">лв Bulgarian Lev</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span data-i18n="campaignStart">Campaign Start</span>
+          <input id="campaign-start" name="campaign-start" type="date" value="2026-05-08" aria-describedby="date-error">
+        </label>
+
+        <label class="field">
+          <span data-i18n="campaignEnd">Campaign End</span>
+          <input id="campaign-end" name="campaign-end" type="date" value="2026-11-04" aria-describedby="date-error">
+          <span class="field-error" id="date-error" aria-live="polite"></span>
+        </label>
+
+        <label class="field">
+          <span data-i18n="totalRevenue">Total Revenue</span>
+          <span class="input-with-prefix"><span class="currency-prefix" id="revenue-prefix" aria-hidden="true">$</span><input id="revenue" name="revenue" type="number" min="0" step="any" value="10000" inputmode="decimal" aria-describedby="revenue-error"></span>
+          <span class="field-error" id="revenue-error" aria-live="polite"></span>
+        </label>
+
+        <label class="field">
+          <span data-i18n="averageOrderValue">Avg. Order Value</span>
+          <span class="input-with-prefix"><span class="currency-prefix" id="order-prefix" aria-hidden="true">$</span><input id="order-value" name="order-value" type="number" min="0" step="any" value="1000" inputmode="decimal" aria-describedby="order-error"></span>
+          <span class="field-error" id="order-error" aria-live="polite"></span>
+        </label>
+      </form>
+    </aside>
+
+    <section class="content" aria-label="Campaign forecast">
+      <section class="overview-panel" aria-label="Monthly forecast and totals">
+        <div class="chart-panel">
+          <div class="chart-layout">
+            <span class="chart-y-label" aria-hidden="true" data-i18n="monthAxis">Month</span>
+            <div class="chart-stage">
+              <div class="chart" id="chart" role="img" aria-label="Monthly campaign forecast"></div>
+              <div class="chart-axis" id="chart-axis" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics" aria-label="Forecast totals">
+          <article class="metric-card metric-prospects">
+            <div class="metric-heading"><span class="metric-icon" aria-hidden="true">▤</span><h2 data-i18n="prospects">Prospects</h2><span class="metric-share" id="prospects-share">100%</span></div>
+            <p class="metric-value" id="prospects-total">125</p>
+            <div class="metric-track" aria-hidden="true"><span id="prospects-progress"></span></div>
+          </article>
+          <article class="metric-card metric-leads">
+            <div class="metric-heading"><span class="metric-icon" aria-hidden="true">●</span><h2 data-i18n="leads">Leads</h2><span class="metric-share" id="leads-share">20%</span></div>
+            <p class="metric-value" id="leads-total">25</p>
+            <div class="metric-track" aria-hidden="true"><span id="leads-progress"></span></div>
+          </article>
+          <article class="metric-card metric-customers">
+            <div class="metric-heading"><span class="metric-icon" aria-hidden="true">★</span><h2 data-i18n="customers">Customers</h2><span class="metric-share" id="customers-share">8%</span></div>
+            <p class="metric-value" id="customers-total">10</p>
+            <div class="metric-track" aria-hidden="true"><span id="customers-progress"></span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="rates-panel" aria-label="Response rates">
+        <label class="slider-field" for="lead-rate">
+          <span class="slider-heading"><span data-i18n="leadResponseRate">Lead Response Rate</span><output id="lead-rate-output" for="lead-rate">40.00%</output></span>
+          <input id="lead-rate" name="lead-rate" type="range" min="1" max="100" step="1" value="40">
+        </label>
+        <label class="slider-field" for="prospect-rate">
+          <span class="slider-heading"><span data-i18n="prospectResponseRate">Prospect Response Rate</span><output id="prospect-rate-output" for="prospect-rate">20.00%</output></span>
+          <input id="prospect-rate" name="prospect-rate" type="range" min="1" max="100" step="1" value="20">
+        </label>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
